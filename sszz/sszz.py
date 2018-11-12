@@ -60,17 +60,10 @@ def check_refactoring_has_happened(repo_dir, commit_a, commit_b):
     commit_ap = f"{commit_a}^1"
     commit_bp = f"{commit_b}^1"
     changes_ap_to_a = git_compare_commits(repo_dir, commit_ap, commit_a)
-    # changes_ap_to_bp = git_compare_commits(repo_dir, commit_ap, commit_bp)
     changes_ap_to_b = git_compare_commits(repo_dir, commit_ap, commit_b)
-    # changes_a_to_bp = git_compare_commits(repo_dir, commit_a, commit_bp)
     changes_a_to_b = git_compare_commits(repo_dir, commit_a, commit_b)
     code_was_refactored_between_a_and_b = ((changes_ap_to_a+changes_a_to_b) != changes_ap_to_b)
-    # code_was_refactored_between_a_and_bp = ((changes_ap_to_a+changes_a_to_bp) != changes_ap_to_bp)
-    code_was_refactored_by_b = (
-        code_was_refactored_between_a_and_b
-        # and
-        # not(code_was_refactored_between_a_and_bp)
-    )
+    code_was_refactored_by_b = code_was_refactored_between_a_and_b
     return code_was_refactored_by_b
 
 def check_refactoring_commit(repo_dir, commit_a, commit_b):
@@ -111,9 +104,12 @@ class Changes(namedtuple('Changes', ['insertions', 'deletions'])):
 def git_compare_commits(repo_dir, commit_a, commit_b):
     "Get number of files changes, insertions and deletions between two commits."
     git_caller = git.cmd.Git(repo_dir)
-    result = git_caller.execute(
-        ['git', 'diff', '-w', '--shortstat', commit_a, commit_b]
-    )
+    try
+        result = git_caller.execute(
+            ['git', 'diff', '-w', '--shortstat', commit_a, commit_b]
+        )
+    except GitCommandError:
+        raise SSZZException
     # files_changed = _get_numeric_var_from_regex_match("(\d+) files? changed", result)
     insertions = _get_numeric_var_from_regex_match("(\d+) insertions?\(\+\)", result)
     deletions = _get_numeric_var_from_regex_match("(\d+) deletions?\(-\)", result)
