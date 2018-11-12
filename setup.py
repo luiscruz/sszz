@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="sszz",
-    version="0.0.2",
+    version="0.0.3",
     author="Luis Cruz",
     author_email="luismirandacruz@gmail.com",
     description="Tool to retrieve the a future commit that has refactored a given commit (simple SZZ).",
