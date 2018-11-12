@@ -8,6 +8,7 @@ import click
 import git
 from git import Repo
 from gitdb.exc import BadName
+from git.exc import GitCommandError
 
 @click.command()
 @click.option('--repo', prompt=True, default="./", help="Path to the git repository.")
@@ -129,11 +130,19 @@ def _add_tuples(t1, t2):
 def get_all_commits_since(repo_dir, commit_sha):
     """Get a list of all commits made after the given commit."""
     #git log --pretty='%H' 10edd33598c80b6e9453bd8c0117b29f004837d3..HEAD
-    git_caller = git.cmd.Git(repo_dir)
-    output = git_caller.execute(
-        ['git', 'log', "--pretty=%H", f"{commit_sha}..HEAD"]
-    )
-    return output.split('\n')[::-1]
+    try:
+        git_caller = git.cmd.Git(repo_dir)
+        output = git_caller.execute(
+            ['git', 'log', "--pretty=%H", f"{commit_sha}..HEAD"]
+        )
+        return output.split('\n')[::-1]
+    except GitCommandError as git_error:
+        _, _, error_message, *_ = git_error.args
+        if "Invalid revision range" in error_message.decode():
+            raise CommitNotFound()
+        else:
+            raise git_error
+        
 
 
 class SSZZException(Exception):
@@ -142,6 +151,10 @@ class SSZZException(Exception):
 
 class CommitWithoutParent(SSZZException):
     """Base Class for gitutils exceptions."""
+    pass
+
+class CommitNotFound(SSZZException):
+    """Exception raised when given commit is not found."""
     pass
 
 if __name__ == '__main__':
