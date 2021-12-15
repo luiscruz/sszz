@@ -1,2 +1,3 @@
 Click==7.0
 GitPython==2.1.11
+gitdb2==3.0.1
