@@ -15,7 +15,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         "Click==7.0",
-        "GitPython==2.1.11",
+        "GitPython==3.1.32",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
